@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campus Customs — Live App Check (Problem 11)</title>
+<style>
+  :root { --ink: #0f1115; --muted: #5c5f66; --yale: #00356b; --soft: #dde7f3; --bg: #f5f2ec; --line: #e2ddd2; --ok: #1f6b3a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  main { width: min(1100px, 100% - 2rem); margin: 0 auto; padding: 3rem 0 4rem; }
+  h1 { margin: 0 0 .4rem; font: 400 2.6rem/1.1 Georgia, "Times New Roman", serif; }
+  h2 { margin: 0 0 .3rem; font: 400 1.9rem/1.15 Georgia, "Times New Roman", serif; color: var(--yale); }
+  .meta { color: var(--muted); margin: 0 0 1.5rem; }
+  .summary { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 2.5rem; }
+  .summary th, .summary td { padding: .7rem 1rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .summary th { background: var(--yale); color: #fff; font-weight: 600; font-size: .9rem; }
+  .pass { color: var(--ok); font-weight: 700; white-space: nowrap; }
+  section { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 1.8rem; margin-bottom: 2rem; }
+  .tag { display: inline-block; margin-bottom: .6rem; padding: .15rem .6rem; border-radius: 999px; background: var(--soft); color: var(--yale); font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .steps { margin: .2rem 0 1rem; color: var(--muted); font-size: .92rem; }
+  figure { margin: 0 0 1rem; }
+  figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
+  figcaption { margin-top: .6rem; }
+  .proves { margin: 0; padding: .8rem 1rem; border-left: 4px solid var(--ok); background: #eef7f1; border-radius: 0 8px 8px 0; }
+  .proves strong { color: var(--ok); }
+  .db { margin: .8rem 0 0; font-size: .9rem; color: var(--muted); }
+  code { background: #f0eee8; padding: .05rem .35rem; border-radius: 4px; font-size: .88em; }
+  .secondary { width: 70%; }
+  .secondary figcaption { font-size: .92rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Campus Customs — Live App Check</h1>
+  <p class="meta">
+    Problem 11 · Tested on the running app on Oct 6, 2026 (React site on <code>localhost:5173</code>, FastAPI +
+    PydanticAI agent on <code>localhost:8000</code>, model <code>gpt-5.6-luna</code>). Screenshots taken in Chrome at
+    1440px wide. Database values come from <code>data/campus_customs.db</code>. Click any screenshot to open it full size.
+  </p>
+
+  <table class="summary">
+    <tr><th>#</th><th>Check</th><th>Result</th></tr>
+    <tr><td>1</td><td>Chat checks an item's inventory level and price from the database</td><td class="pass">✓ Pass</td></tr>
+    <tr><td>2</td><td>A category question ("What hoodies do you have?") puts product cards on the page</td><td class="pass">✓ Pass</td></tr>
+    <tr><td>3</td><td>Problem 9 usability feature: Compare, with a size-by-size stock grid</td><td class="pass">✓ Pass</td></tr>
+  </table>
+
+  <!-- Check 1 -->
+  <section id="check-1">
+    <span class="tag">Check 1</span>
+    <h2>Chat checks inventory: honest stock and price from the database</h2>
+    <p class="steps">Steps: opened the Baseball Left Chest Crewneck page, opened the chat, and asked
+      "How much is the Baseball Left Chest Crewneck, and do you have it in XL or M?"</p>
+    <figure>
+      <a href="app_check_images/inventory.png"><img src="app_check_images/inventory.png" alt="Chat reply giving the $58 price, 5 in stock in M, and XL sold out, next to the product page's size grid" /></a>
+      <figcaption>
+        <p class="proves"><strong>Proves:</strong> Dan looked the item up with the <code>get_product_details</code> and
+          <code>check_stock</code> tools. He answered with the real price ($58), the real M stock (5), and said
+          plainly that XL is sold out. He then offered in-stock XL alternatives instead of pretending.</p>
+        <p class="db">Database: <code>catalogue.price</code> = 58.0; <code>inventory</code> M = 5, XL = 0. The same numbers
+          appear on the page's own size grid behind the chat (M "5 left", XS "Sold out"). The suggested alternatives also
+          match the database: District Vit Standing Bulldog XL = 5, Diving Left Chest XL = 5, Hype And Vice Offside XL = 20.</p>
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- Check 2 -->
+  <section id="check-2">
+    <span class="tag">Check 2</span>
+    <h2>Category question → dynamic product cards on the page</h2>
+    <p class="steps">Steps: opened the About Us page (which shows no products), opened the chat, and asked
+      "What hoodies do you have?"</p>
+    <figure>
+      <a href="app_check_images/search_cards.png"><img src="app_check_images/search_cards.png" alt="About page now showing a 'Yale Hoodies — 27 products' section of product cards beside the chat" /></a>
+      <figcaption>
+        <p class="proves"><strong>Proves:</strong> The agent called <code>search_products</code> and returned structured
+          matches. The website rendered them as a "Yale Hoodies · 27 products" section of cards (image, name, price,
+          short description) on a page that had no products before.</p>
+        <p class="db">Database: 27 catalogue rows are hoodies, and the prices match (e.g. Basic Hoodie Big Yale $68,
+          Champion Full Zip Hood $88).</p>
+      </figcaption>
+    </figure>
+    <figure class="secondary">
+      <a href="app_check_images/search_card_opened.png"><img src="app_check_images/search_card_opened.png" alt="Detail page for Basic Hoodie Big Yale opened from a chat card" /></a>
+      <figcaption>Supporting: clicking the first chat card opened its single-item page (<code>/products/basic-hoodie-big-yale</code>,
+        large image plus full details), so the cards the chat adds still link to the detail view.</figcaption>
+    </figure>
+  </section>
+
+  <!-- Check 3 -->
+  <section id="check-3">
+    <span class="tag">Check 3 · Problem 9</span>
+    <h2>Usability feature: Compare with real stock in every size</h2>
+    <p class="steps">Steps: on Products → Crewnecks, clicked "+ Compare" on three crewnecks, clicked "Compare 3" in the
+      tray, then picked size XL.</p>
+    <figure>
+      <a href="app_check_images/compare.png"><img src="app_check_images/compare.png" alt="Compare page with three crewnecks side by side, XL row highlighted" /></a>
+      <figcaption>
+        <p class="proves"><strong>Proves:</strong> The Compare page shows three products side by side with price, colors,
+          and stock for every size. Picking XL highlights that row and gives a plain verdict: "Only Champion Mens Triumph
+          Raglan Crew and Champion Reverse Weave Crewneck are in stock in XL."</p>
+        <p class="db">Database: XL = 0 / 2 / 12 for the three crewnecks, all priced $58.00. Total stock 70 / 56 / 24, so
+          "Most in stock" correctly goes to the Baseball Left Chest Crewneck.</p>
+      </figcaption>
+    </figure>
+    <figure class="secondary">
+      <a href="app_check_images/compare_tray.png"><img src="app_check_images/compare_tray.png" alt="Products page with three crewnecks marked Comparing and the compare tray at the bottom" /></a>
+      <figcaption>Supporting: the "+ Compare" buttons on the product cards and the floating compare tray that collects
+        the picks (with "Compare 3" in the tray and the nav).</figcaption>
+    </figure>
+  </section>
+</main>
+</body>
+</html>

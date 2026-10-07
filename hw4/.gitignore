@@ -1,0 +1,29 @@
+# ---- Secrets (never commit) ----
+.env
+.env.*
+!.env.example
+backend/.session_secret
+
+# ---- Local-only data pack: database + product images ----
+data/
+*.db
+*.db.bak*
+*.sqlite*
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ---- Node / Vite ----
+node_modules/
+frontend/dist/
+*.log
+
+# ---- OS / editor / scratch ----
+.DS_Store
+.vscode/
+.idea/
+.gitkeep
+joke.txt

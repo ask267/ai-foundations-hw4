@@ -1,0 +1,22 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import './index.css'
+import App from './App.tsx'
+import { AuthProvider } from './auth.tsx'
+import { ChatResultsProvider } from './chatResults.tsx'
+import { CompareProvider } from './compare.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <ChatResultsProvider>
+          <CompareProvider>
+            <App />
+          </CompareProvider>
+        </ChatResultsProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </StrictMode>,
+)
